@@ -20,6 +20,8 @@ jobs:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -28,6 +30,9 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
 
+      - name: Link Vercel project
+        run: vercel link --yes --project=$VERCEL_PROJECT_ID --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+
       - name: Deploy (Production)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: vercel deploy --prod --token=$VERCEL_TOKEN
@@ -35,7 +40,9 @@ jobs:
       - name: Deploy (Preview)
         if: github.event_name == 'pull_request'
         id: preview
-        run: echo "url=$(vercel deploy --token=$VERCEL_TOKEN)" >> "$GITHUB_OUTPUT"
+        run: |
+          DEPLOY_URL=$(vercel deploy --token=$VERCEL_TOKEN)
+          echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'
