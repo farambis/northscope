@@ -25,6 +25,9 @@ src/
 ├── lib/           # Utilities and helpers (e.g. utils.ts)
 ├── hooks/         # Custom React hooks
 └── types/         # TypeScript type definitions
+docs/
+└── adr/           # Architecture Decision Records
+e2e/               # Playwright E2E tests (when added)
 ```
 
 ## Commands
