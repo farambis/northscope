@@ -78,11 +78,11 @@ How we would move from "show the number" to "explain the number" — enabling th
 
 ## Task 4: AI Browser Agents for Testing
 
-> **Disclaimer:** Created with Gemini and Claude Code under time constraints — initial sketch, not a final architecture.
-
 An AI browser agent (built on Playwright) describes tests in natural language and uses a vision model to verify what's on screen — you tell it *what to check*, it figures out *how*.
 
 **Why AI agents over plain Playwright:** Self-healing selectors (finds "the export button" by intent, not brittle `data-testid`), visual assertions (a vision model can tell if a chart rendered correctly — DOM selectors can't), and lower maintenance (natural-language steps don't break when components change).
+
+**Flakiness reduction:** E2E tests are a required CI gate — no merge to `main` and no deployment until green. This forces flaky tests to be fixed immediately since they block the entire team. Static mock data eliminates network races; screenshots and traces on failure enable fast debugging.
 
 **Example smoke tests:**
 
@@ -91,8 +91,6 @@ An AI browser agent (built on Playwright) describes tests in natural language an
 2. "Export works" → click Export Report → select Markdown → click Generate → verify .md file downloads
 3. "KPI detail" → click first KPI card → verify detail heading, chart, and data table are visible
 ```
-
-**Flakiness reduction:** E2E tests are a required CI gate — no merge to `main` and no deployment until green. This forces flaky tests to be fixed immediately since they block the entire team. Static mock data eliminates network races; screenshots and traces on failure enable fast debugging.
 
 ## Task 5: AI-Assisted Development Pipeline
 
