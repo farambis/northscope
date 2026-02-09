@@ -36,16 +36,16 @@ describe("KpiDetailChart", () => {
     expect(screen.getByText("Trend")).toBeInTheDocument()
   })
 
-  it("renders the forecast checkbox checked by default", () => {
+  it("renders the forecast switch on by default", () => {
     render(<KpiDetailChart kpiId="mrr" color="var(--chart-1)" />)
 
-    const checkbox = screen.getByRole("checkbox")
-    expect(checkbox).toBeChecked()
+    const toggle = screen.getByRole("switch")
+    expect(toggle).toHaveAttribute("data-state", "checked")
   })
 
-  it("renders the Show Forecast label", () => {
+  it("renders the dynamic forecast label with day count", () => {
     render(<KpiDetailChart kpiId="mrr" color="var(--chart-1)" />)
 
-    expect(screen.getByText("Show Forecast")).toBeInTheDocument()
+    expect(screen.getByText("Show 10-day forecast")).toBeInTheDocument()
   })
 })
