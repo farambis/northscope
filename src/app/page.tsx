@@ -1,6 +1,7 @@
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
 import { KpiCard } from "@/components/dashboard/KpiCard"
 import { KpiGrid } from "@/components/dashboard/KpiGrid"
+import { TrendsSection } from "@/components/dashboard/TrendsSection"
 import { kpis } from "@/data/kpis"
 
 export default function Home() {
@@ -26,6 +27,9 @@ export default function Home() {
             <KpiCard key={kpi.label} {...kpi} />
           ))}
         </KpiGrid>
+        <div className="mt-8">
+          <TrendsSection />
+        </div>
       </main>
     </div>
   )

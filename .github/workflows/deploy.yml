@@ -28,10 +28,14 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
 
+      - name: Verify Vercel token
+        run: vercel whoami --token=$VERCEL_TOKEN
+
       - name: Create Vercel project link
         run: |
           mkdir -p .vercel
           printf '{"projectId":"prj_FGly4KoFviTIFOn0diXvnvet3Xfg","orgId":"team_s9aNsSseosecdFS1J42DXNSr"}' > .vercel/project.json
+          cat .vercel/project.json
 
       - name: Deploy (Production)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
