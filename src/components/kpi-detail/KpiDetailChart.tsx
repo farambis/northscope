@@ -13,6 +13,8 @@ import {
   YAxis,
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { formatKpiValue } from "@/lib/format"
 import { computeForecast, getForecastDays } from "@/lib/forecast"
@@ -25,6 +27,7 @@ interface ChartDataPoint {
   forecast: number | null
   upper: number | null
   lower: number | null
+  band: number | null
 }
 
 function CustomTooltip({
@@ -86,6 +89,7 @@ function buildChartData(
     forecast: null,
     upper: null,
     lower: null,
+    band: null,
   }))
 
   if (!showForecast || historicalData.length === 0) return chartData
@@ -94,10 +98,14 @@ function buildChartData(
   const forecastPoints = computeForecast(historicalData, forecastDays)
 
   // Bridge: set forecast values on last historical point to connect the lines
-  const last = chartData[chartData.length - 1]
-  last.forecast = last.value
-  last.upper = last.value
-  last.lower = last.value
+  const lastValue = chartData[chartData.length - 1].value
+  chartData[chartData.length - 1] = {
+    ...chartData[chartData.length - 1],
+    forecast: lastValue,
+    upper: lastValue,
+    lower: lastValue,
+    band: 0,
+  }
 
   for (const fp of forecastPoints) {
     chartData.push({
@@ -106,6 +114,7 @@ function buildChartData(
       forecast: fp.forecast,
       upper: fp.upper,
       lower: fp.lower,
+      band: fp.upper - fp.lower,
     })
   }
 
@@ -130,6 +139,7 @@ export function KpiDetailChart({
 
   const chartData = useMemo(
     () => buildChartData(historicalData, showForecast, timeRange),
+    // historicalData is derived from timeRange + kpiId, so those are the true deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [timeRange, showForecast, kpiId],
   )
@@ -199,15 +209,16 @@ export function KpiDetailChart({
               <>
                 <Area
                   type="monotone"
-                  dataKey="upper"
+                  dataKey="lower"
+                  stackId="confidence"
                   stroke="none"
-                  fill={color}
-                  fillOpacity={0}
+                  fill="transparent"
                   connectNulls={false}
                 />
                 <Area
                   type="monotone"
-                  dataKey="lower"
+                  dataKey="band"
+                  stackId="confidence"
                   stroke="none"
                   fill={color}
                   fillOpacity={0.1}
@@ -227,15 +238,16 @@ export function KpiDetailChart({
             )}
           </ComposedChart>
         </ResponsiveContainer>
-        <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-          <input
-            type="checkbox"
+        <div className="mt-3 flex items-center gap-2">
+          <Switch
+            id="show-forecast"
             checked={showForecast}
-            onChange={(e) => setShowForecast(e.target.checked)}
-            className="accent-primary"
+            onCheckedChange={setShowForecast}
           />
-          Show Forecast
-        </label>
+          <Label htmlFor="show-forecast" className="text-sm text-muted-foreground cursor-pointer">
+            Show {getForecastDays(timeRange)}-day forecast
+          </Label>
+        </div>
       </CardContent>
     </Card>
   )
