@@ -39,52 +39,52 @@ const unusualGroup: AnomalyGroup = {
 
 describe("AnomalyCard", () => {
   it("renders similar type badge", () => {
-    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByText("SIMILAR")).toBeInTheDocument()
   })
 
   it("renders typo type badge", () => {
-    render(<AnomalyCard group={typoGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={typoGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByText("TYPO")).toBeInTheDocument()
   })
 
   it("renders unusual type badge", () => {
-    render(<AnomalyCard group={unusualGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={unusualGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByText("UNUSUAL")).toBeInTheDocument()
   })
 
   it("renders confidence badge for similar group", () => {
-    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByText("HIGH")).toBeInTheDocument()
   })
 
   it("renders all entries for similar type", () => {
-    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByText(/149\.99/)).toBeInTheDocument()
     expect(screen.getByText(/89\.50/)).toBeInTheDocument()
   })
 
   it("renders matched pattern info for typo type", () => {
-    render(<AnomalyCard group={typoGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={typoGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByText(/Monthly rent payment/)).toBeInTheDocument()
     expect(screen.getByText(/24 occurrences/)).toBeInTheDocument()
   })
 
   it("renders reason tags for unusual type", () => {
-    render(<AnomalyCard group={unusualGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={unusualGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByText("Contains test data pattern")).toBeInTheDocument()
     expect(screen.getByText("Non-descriptive text")).toBeInTheDocument()
   })
 
   it("renders the entry text for unusual type", () => {
-    render(<AnomalyCard group={unusualGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={unusualGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByText("asdf test 123")).toBeInTheDocument()
   })
@@ -92,7 +92,7 @@ describe("AnomalyCard", () => {
   it("calls onDismiss when dismiss button is clicked", async () => {
     const user = userEvent.setup()
     const onDismiss = vi.fn()
-    render(<AnomalyCard group={similarGroup} onDismiss={onDismiss} onAction={vi.fn()} />)
+    render(<AnomalyCard group={similarGroup} onDismiss={onDismiss} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     await user.click(screen.getByRole("button", { name: /dismiss/i }))
     expect(onDismiss).toHaveBeenCalledWith("sim-1")
@@ -101,15 +101,26 @@ describe("AnomalyCard", () => {
   it("calls onAction when the primary action button is clicked", async () => {
     const user = userEvent.setup()
     const onAction = vi.fn()
-    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={onAction} />)
+    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={onAction} onMarkIntended={vi.fn()} />)
 
     await user.click(screen.getByRole("button", { name: /review & fix/i }))
     expect(onAction).toHaveBeenCalledWith("sim-1")
   })
 
   it("shows Mark as Intended button", () => {
-    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={vi.fn()} />)
+    render(<AnomalyCard group={similarGroup} onDismiss={vi.fn()} onAction={vi.fn()} onMarkIntended={vi.fn()} />)
 
     expect(screen.getByRole("button", { name: /mark as intended/i })).toBeInTheDocument()
+  })
+
+  it("calls onMarkIntended when Mark as Intended button is clicked", async () => {
+    const user = userEvent.setup()
+    const onMarkIntended = vi.fn()
+    const onDismiss = vi.fn()
+    render(<AnomalyCard group={similarGroup} onDismiss={onDismiss} onAction={vi.fn()} onMarkIntended={onMarkIntended} />)
+
+    await user.click(screen.getByRole("button", { name: /mark as intended/i }))
+    expect(onMarkIntended).toHaveBeenCalledWith("sim-1")
+    expect(onDismiss).not.toHaveBeenCalled()
   })
 })

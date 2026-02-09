@@ -57,4 +57,40 @@ describe("computeInlineDiff", () => {
     const nonHighlighted = result.filter((s) => !s.highlight)
     expect(nonHighlighted.map((s) => s.text).join("")).toContain("Gehalt Janu")
   })
+
+  it("highlights exactly one character with repeated characters", () => {
+    const result = computeInlineDiff("aaa", "aa")
+
+    const fullText = result.map((s) => s.text).join("")
+    expect(fullText).toBe("aaa")
+
+    const highlighted = result.filter((s) => s.highlight)
+    expect(highlighted.length).toBeGreaterThan(0)
+
+    const highlightedText = highlighted.map((s) => s.text).join("")
+    expect(highlightedText.length).toBe(1)
+  })
+
+  it("highlights exactly one extra space in context with repeated characters", () => {
+    const result = computeInlineDiff("Miete  Büro", "Miete Büro")
+
+    const fullText = result.map((s) => s.text).join("")
+    expect(fullText).toBe("Miete  Büro")
+
+    const highlighted = result.filter((s) => s.highlight)
+    expect(highlighted.length).toBeGreaterThan(0)
+
+    const highlightedText = highlighted.map((s) => s.text).join("")
+    expect(highlightedText).toBe(" ")
+  })
+
+  it("highlights characters covering transposition", () => {
+    const result = computeInlineDiff("paymnet", "payment")
+
+    const fullText = result.map((s) => s.text).join("")
+    expect(fullText).toBe("paymnet")
+
+    const highlighted = result.filter((s) => s.highlight)
+    expect(highlighted.length).toBeGreaterThan(0)
+  })
 })

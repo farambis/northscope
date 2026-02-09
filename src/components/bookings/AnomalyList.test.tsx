@@ -141,4 +141,40 @@ describe("AnomalyList", () => {
     expect(screen.getByText("3")).toBeInTheDocument()
     expect(screen.getByText("Total")).toBeInTheDocument()
   })
+
+  it("removes a card when marked as intended and shows correct toast", async () => {
+    const user = userEvent.setup()
+    const { toast } = await import("sonner")
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    const markIntendedButtons = screen.getAllByRole("button", { name: /mark as intended/i })
+    await user.click(markIntendedButtons[0])
+
+    expect(screen.getByText("SIMILAR")).toBeInTheDocument()
+    expect(screen.getByText("TYPO")).toBeInTheDocument()
+    expect(screen.queryByText("UNUSUAL")).not.toBeInTheDocument()
+    expect(toast).toHaveBeenCalledWith("Marked as intended", expect.objectContaining({
+      action: expect.any(Object)
+    }))
+  })
+
+  it("shows counts in all-reviewed state when items are dismissed and marked as intended", async () => {
+    const user = userEvent.setup()
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    // Dismiss one card
+    const dismissButton = screen.getAllByRole("button", { name: /dismiss/i })[0]
+    await user.click(dismissButton)
+
+    // Mark two as intended
+    const markIntendedButtons = screen.getAllByRole("button", { name: /mark as intended/i })
+    await user.click(markIntendedButtons[0])
+
+    const markIntendedButtons2 = screen.getAllByRole("button", { name: /mark as intended/i })
+    await user.click(markIntendedButtons2[0])
+
+    expect(screen.getByText(/all reviewed/i)).toBeInTheDocument()
+    expect(screen.getByText(/1 dismissed/i)).toBeInTheDocument()
+    expect(screen.getByText(/2 marked as intended/i)).toBeInTheDocument()
+  })
 })
