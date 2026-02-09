@@ -31,7 +31,7 @@ jobs:
       - name: Create Vercel project link
         run: |
           mkdir -p .vercel
-          printf '{"projectId":"prj_FGly4KoFviTIFOn0diXvnvet3Xfg","orgId":"team_s9aNsSseosecdFS1J42DXNSr"}' > .vercel/project.json
+          printf '{"projectId":"prj_LT8h2fE4li0X9wwTD3MHRjL369uG","orgId":"team_l2RQSubsdzMVrGfkGl2KstDr"}' > .vercel/project.json
 
       - name: Deploy (Production)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
