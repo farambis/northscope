@@ -138,21 +138,21 @@ export function AnomalyCard({ group, onDismiss, onAction, onMarkIntended }: Anom
   const { label, style } = typeBadgeConfig[group.type]
 
   return (
-    <Card>
-      <CardHeader className="flex-row items-center justify-between space-y-0">
+    <Card className="relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute right-2 top-2 h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-colors"
+        onClick={() => onDismiss(group.id)}
+        aria-label="Dismiss"
+      >
+        <X className="h-3.5 w-3.5" />
+      </Button>
+      <CardHeader className="flex-row items-center space-y-0 pr-10">
         <div className="flex items-center gap-2">
           <Badge className={style}>{label}</Badge>
           <ConfidenceBadge confidence={group.confidence} />
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-colors"
-          onClick={() => onDismiss(group.id)}
-          aria-label="Dismiss"
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {group.type === "similar" && <SimilarContent group={group} />}
@@ -163,7 +163,7 @@ export function AnomalyCard({ group, onDismiss, onAction, onMarkIntended }: Anom
             {actionLabels[group.type]}
           </Button>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => onMarkIntended(group.id)}
           >
