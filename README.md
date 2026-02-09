@@ -54,6 +54,28 @@ northscope/
 
 This project is for simulation and demonstration purposes.
 
+## Task 3: Context Engineering / Knowledge Graph
+
+> **Disclaimer:** This section was created with the help of Gemini and Claude Code under time constraints. It represents an initial sketch and would need deeper analysis and validation before being used as an actual architecture blueprint.
+
+How we would move from "show the number" to "explain the number" — enabling the dashboard to answer questions like *"Why was this discount granted?"* or *"Why is this KPI calculated this way?"*
+
+- **Context sources to ingest:** Data Dictionary (KPI definitions, formulas, thresholds), SOPs and approval policies (discount rules, signing authority), CRM notes and ticket history (deal-specific context), email threads linked to transactions, and ERP transformation logic (SQL/dbt models that produce each metric). Each source type gets a dedicated loader that normalizes content into chunked documents with structured metadata (source system, last-updated timestamp, owner).
+
+- **Knowledge graph schema:** The core model links `KPI` → `Definition` (formula, thresholds) → `Owner` (responsible team/person) → `Query/Transformation` (the dbt model or SQL that computes it) → `Approval` (who signed off on the logic or a specific override) → `Document` (the SOP, email, or CRM note backing the decision). Each entity carries provenance metadata (source system, version, last-modified). Relations are typed and directional — e.g. a KPI `computed_by` a transformation, a discount `approved_by` an approval referencing a policy document.
+
+- **Ingestion pipeline:** Documents are chunked (overlapping windows, ~512 tokens), embedded via an embedding model (e.g. `text-embedding-3-large`), and stored in a vector store (e.g. Pinecone or pgvector). In parallel, an LLM-based extraction step identifies entities and relations from each chunk and writes them as nodes/edges into a graph database (e.g. Neo4j). A nightly sync job re-processes changed documents; unchanged documents are skipped via content hashing.
+
+- **Hybrid retrieval — Vector + Graph:** User questions first hit a vector search to find the most semantically relevant chunks. The top-k results are then expanded via graph traversal — e.g. if a chunk mentions a KPI, we traverse `KPI → Definition → Transformation → Approval` to pull in the full lineage. This two-phase approach (semantic recall → structured expansion) ensures answers are both relevant and complete.
+
+- **Evidence-first response pattern:** Every LLM answer must cite specific source documents. The system prompt enforces a `claim → evidence` format: each statement links back to a retrieved chunk with source name, date, and section. If the retrieved context is insufficient, the model responds with "insufficient context" rather than speculating. This makes answers auditable and builds trust with finance users who need traceability.
+
+- **UX integration:** On the KPI detail page, a "Why?" button or chat panel lets users ask natural-language questions scoped to that KPI. The system pre-loads the KPI's graph neighborhood as context, so common questions ("How is this calculated?", "Who approved this formula?") resolve from the graph without needing vector search. Answers render inline with collapsible source citations.
+
+- **Risk 1 — Stale context:** SOPs and policies change, but the knowledge graph may lag behind. *Mitigation:* Every document node carries a `lastSynced` timestamp. At query time, cited sources older than a configurable threshold (e.g. 30 days) are flagged with a staleness warning. The ingestion pipeline runs nightly and alerts document owners when content hashing detects upstream changes that haven't been re-reviewed.
+
+- **Risk 2 — Hallucination / incorrect attribution:** The LLM may fabricate connections between real documents or misattribute a policy to the wrong KPI. *Mitigation:* Constrained generation — the model may only cite chunk IDs that were actually retrieved (enforced by post-processing validation). Graph-based answers are preferred over pure vector answers for lineage questions, since relations are explicit rather than inferred. Confidence scoring on retrieval results lets the UI distinguish high-confidence answers from best-effort ones.
+
 ## Task 5: AI-Assisted Development Pipeline
 
 This section describes the AI-assisted development pipeline used to build Fara-Scope. Every feature flows through a structured sequence of roles, automated gates, and review checkpoints before it reaches `main`.
