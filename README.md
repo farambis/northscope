@@ -56,6 +56,8 @@ This project is for simulation and demonstration purposes.
 
 ## Task 3: Context Engineering / Knowledge Graph
 
+> **Disclaimer:** This section was created with the help of Gemini and Claude Code under time constraints. It represents an initial sketch and would need deeper analysis and validation before being used as an actual architecture blueprint.
+
 How we would move from "show the number" to "explain the number" — enabling the dashboard to answer questions like *"Why was this discount granted?"* or *"Why is this KPI calculated this way?"*
 
 - **Context sources to ingest:** Data Dictionary (KPI definitions, formulas, thresholds), SOPs and approval policies (discount rules, signing authority), CRM notes and ticket history (deal-specific context), email threads linked to transactions, and ERP transformation logic (SQL/dbt models that produce each metric). Each source type gets a dedicated loader that normalizes content into chunked documents with structured metadata (source system, last-updated timestamp, owner).
