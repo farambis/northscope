@@ -147,11 +147,11 @@ export function AnomalyCard({ group, onDismiss, onAction, onMarkIntended }: Anom
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7"
+          className="h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-colors"
           onClick={() => onDismiss(group.id)}
           aria-label="Dismiss"
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
