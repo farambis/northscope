@@ -10,12 +10,12 @@ describe("ExportPreview", () => {
 
   it('shows "Markdown" for markdown format', () => {
     render(<ExportPreview format="markdown" selectedCount={5} />)
-    expect(screen.getByText(/Markdown/)).toBeInTheDocument()
+    expect(screen.getByText(/· Markdown$/)).toBeInTheDocument()
   })
 
   it('shows "JSON" for json format', () => {
     render(<ExportPreview format="json" selectedCount={5} />)
-    expect(screen.getByText(/JSON/)).toBeInTheDocument()
+    expect(screen.getByText(/· JSON$/)).toBeInTheDocument()
   })
 
   it("shows Markdown preview note for pdf format", () => {

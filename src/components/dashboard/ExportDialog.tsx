@@ -160,11 +160,11 @@ export function ExportDialog() {
                     onCheckedChange={() => handleToggleKpi(kpi.id)}
                   />
                   <span className="flex-1 text-sm">{kpi.label}</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="w-20 text-right text-sm text-muted-foreground">
                     {kpi.value}
                   </span>
                   <span
-                    className={`text-sm ${kpi.change.isPositive ? "text-positive" : "text-negative"}`}
+                    className={`w-16 text-right text-sm ${kpi.change.isPositive ? "text-positive" : "text-negative"}`}
                   >
                     {kpi.change.value >= 0 ? "\u2191" : "\u2193"}{" "}
                     {Math.abs(kpi.change.value)}%
