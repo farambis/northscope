@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/victor.webersberger/private/northscope log --oneline -10)",
+      "Bash(git -C /Users/victor.webersberger/private/northscope status)",
+      "Bash(git -C /Users/victor.webersberger/private/northscope diff)",
+      "Bash(git -C /Users/victor.webersberger/private/northscope log --oneline -5)",
+      "Bash(git -C /Users/victor.webersberger/private/northscope add CLAUDE.md .claude/)",
+      "Bash(git -C /Users/victor.webersberger/private/northscope commit -m \"$\\(cat <<''EOF''\nAdd CLAUDE.md and role definitions for Claude Code\nEOF\n\\)\")"
+    ]
+  }
+}
