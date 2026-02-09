@@ -13,6 +13,7 @@ interface AnomalyCardProps {
   group: AnomalyGroup
   onDismiss: (id: string) => void
   onAction: (id: string) => void
+  onMarkIntended: (id: string) => void
 }
 
 const typeBadgeConfig = {
@@ -133,7 +134,7 @@ const actionLabels = {
   unusual: "Edit Booking",
 } as const
 
-export function AnomalyCard({ group, onDismiss, onAction }: AnomalyCardProps) {
+export function AnomalyCard({ group, onDismiss, onAction, onMarkIntended }: AnomalyCardProps) {
   const { label, style } = typeBadgeConfig[group.type]
 
   return (
@@ -145,7 +146,8 @@ export function AnomalyCard({ group, onDismiss, onAction }: AnomalyCardProps) {
         </div>
         <Button
           variant="ghost"
-          size="icon-xs"
+          size="icon"
+          className="h-7 w-7"
           onClick={() => onDismiss(group.id)}
           aria-label="Dismiss"
         >
@@ -163,7 +165,7 @@ export function AnomalyCard({ group, onDismiss, onAction }: AnomalyCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDismiss(group.id)}
+            onClick={() => onMarkIntended(group.id)}
           >
             Mark as Intended
           </Button>

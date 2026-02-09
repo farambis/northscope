@@ -52,10 +52,11 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState<SortOption>("confidence")
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
+  const [markedIntendedIds, setMarkedIntendedIds] = useState<Set<string>>(new Set())
 
   const activeAnomalies = useMemo(() => {
-    return anomalies.filter((a) => !dismissedIds.has(a.id))
-  }, [anomalies, dismissedIds])
+    return anomalies.filter((a) => !dismissedIds.has(a.id) && !markedIntendedIds.has(a.id))
+  }, [anomalies, dismissedIds, markedIntendedIds])
 
   const filteredAnomalies = useMemo(() => {
     let result = activeAnomalies
@@ -114,7 +115,26 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
     })
   }
 
+  function handleMarkIntended(id: string) {
+    setMarkedIntendedIds((prev) => new Set([...prev, id]))
+    toast("Marked as intended", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setMarkedIntendedIds((prev) => {
+            const next = new Set(prev)
+            next.delete(id)
+            return next
+          })
+        },
+      },
+    })
+  }
+
   if (activeAnomalies.length === 0) {
+    const dismissedCount = dismissedIds.size
+    const markedIntendedCount = markedIntendedIds.size
+
     return (
       <div className="space-y-6">
         <AnomalySummaryBar anomalies={activeAnomalies} />
@@ -122,7 +142,13 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
           <CheckCircle2 className="h-12 w-12 text-positive mb-4" />
           <h3 className="text-lg font-semibold">All reviewed</h3>
           <p className="text-muted-foreground">
-            Every anomaly has been reviewed. Nice work!
+            {dismissedCount > 0 || markedIntendedCount > 0 ? (
+              <>
+                {dismissedCount} dismissed &middot; {markedIntendedCount} marked as intended
+              </>
+            ) : (
+              "Every anomaly has been reviewed. Nice work!"
+            )}
           </p>
         </div>
       </div>
@@ -181,6 +207,7 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
               group={group}
               onDismiss={handleDismiss}
               onAction={handleAction}
+              onMarkIntended={handleMarkIntended}
             />
           ))}
         </div>
