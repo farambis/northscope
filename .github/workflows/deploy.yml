@@ -13,6 +13,7 @@ concurrency:
 env:
   VERCEL_ORG_ID: team_s9aNsSseosecdFS1J42DXNSr
   VERCEL_PROJECT_ID: prj_FGly4KoFviTIFOn0diXvnvet3Xfg
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
   deploy:
@@ -24,39 +25,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: "npm"
-
       - name: Install Vercel CLI
         run: npm install -g vercel
 
-      - name: Create Vercel project link
-        run: |
-          mkdir -p .vercel
-          echo '{"projectId":"${{ env.VERCEL_PROJECT_ID }}","orgId":"${{ env.VERCEL_ORG_ID }}"}' > .vercel/project.json
-
-      - name: Pull Vercel environment
-        run: vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build (Production)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
       - name: Deploy (Production)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build (Preview)
-        if: github.event_name == 'pull_request'
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prod --token=$VERCEL_TOKEN
 
       - name: Deploy (Preview)
         if: github.event_name == 'pull_request'
         id: preview
-        run: echo "url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(vercel deploy --token=$VERCEL_TOKEN)" >> "$GITHUB_OUTPUT"
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'
