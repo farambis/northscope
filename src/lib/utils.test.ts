@@ -10,7 +10,7 @@ describe("cn", () => {
     expect(cn("px-2", "px-4")).toBe("px-4");
   });
 
-  it("handles conditional classes", () => {
+  it("handles falsy values", () => {
     expect(cn("base", false && "hidden", "visible")).toBe("base visible");
   });
 });
