@@ -2,6 +2,7 @@ import type { Kpi } from "@/types/kpi"
 
 export const kpis: Kpi[] = [
   {
+    id: "mrr",
     label: "Monthly Recurring Revenue",
     value: "$47.2k",
     change: { value: 12.3, isPositive: true },
@@ -9,6 +10,7 @@ export const kpis: Kpi[] = [
     badge: { text: "GROWING", variant: "positive" },
   },
   {
+    id: "revenue",
     label: "Revenue",
     value: "$124.5k",
     change: { value: 8.7, isPositive: true },
@@ -16,6 +18,7 @@ export const kpis: Kpi[] = [
     badge: { text: "STRONG", variant: "positive" },
   },
   {
+    id: "burnRate",
     label: "Burn Rate",
     value: "$18.3k",
     change: { value: -5.2, isPositive: true },
@@ -23,6 +26,7 @@ export const kpis: Kpi[] = [
     badge: { text: "IMPROVING", variant: "positive" },
   },
   {
+    id: "cashFlow",
     label: "Cash Flow",
     value: "$42.1k",
     change: { value: 22.4, isPositive: true },
@@ -30,6 +34,7 @@ export const kpis: Kpi[] = [
     badge: { text: "POSITIVE", variant: "positive" },
   },
   {
+    id: "profitMargin",
     label: "Profit Margin",
     value: "34.2%",
     change: { value: 3.1, isPositive: true },

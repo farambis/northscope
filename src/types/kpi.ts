@@ -1,3 +1,5 @@
+import type { KpiId } from "@/types/trends"
+
 export type BadgeVariant = "positive" | "warning" | "negative"
 
 export interface KpiChange {
@@ -11,6 +13,7 @@ export interface KpiBadge {
 }
 
 export interface Kpi {
+  id: KpiId
   label: string
   value: string
   change: KpiChange
