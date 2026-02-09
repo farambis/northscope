@@ -1,13 +1,25 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { BarChart3 } from "lucide-react"
 
 const navItems = [
-  { label: "Dashboard", href: "/", active: true },
-  { label: "Reports", href: "/reports", active: false },
-  { label: "Settings", href: "/settings", active: false },
+  { label: "Dashboard", href: "/" },
+  { label: "Reports", href: "/reports" },
+  { label: "Settings", href: "/settings" },
 ]
 
+function isNavItemActive(href: string, pathname: string): boolean {
+  if (href === "/") {
+    return pathname === "/" || pathname.startsWith("/kpi/")
+  }
+  return pathname === href || pathname.startsWith(href + "/")
+}
+
 export function DashboardHeader() {
+  const pathname = usePathname()
+
   return (
     <header className="sticky top-0 z-50 border-b bg-card">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
@@ -23,7 +35,7 @@ export function DashboardHeader() {
               key={item.label}
               href={item.href}
               className={
-                item.active
+                isNavItemActive(item.href, pathname)
                   ? "text-sm font-medium text-foreground"
                   : "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               }

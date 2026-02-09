@@ -4,6 +4,7 @@ import { KpiCard } from "./KpiCard"
 
 describe("KpiCard", () => {
   const defaultProps = {
+    id: "mrr" as const,
     label: "Monthly Recurring Revenue",
     value: "$47.2k",
     change: { value: 12.3, isPositive: true },
@@ -64,5 +65,12 @@ describe("KpiCard", () => {
     render(<KpiCard {...defaultProps} />)
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument()
+  })
+
+  it("renders as a link to the KPI detail page", () => {
+    render(<KpiCard {...defaultProps} />)
+
+    const link = screen.getByRole("link")
+    expect(link).toHaveAttribute("href", "/kpi/mrr")
   })
 })
