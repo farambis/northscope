@@ -4,16 +4,21 @@ A simulated finance insights interface built with Next.js. Fara-Scope provides a
 
 ## Features
 
-- **KPI Cards** — 3–5 cards displaying key financial metrics at a glance (e.g. revenue, expenses, profit margin, cash flow)
-- **Trends / Time Series View** — Interactive chart showing KPI trends over time, with filters for time range and KPI selection
-- **KPI Detail View** — Click any KPI card to open a dedicated detail page with an expanded chart and a data table
+- **KPI Cards** — Five cards displaying key financial metrics at a glance (MRR, revenue, burn rate, cash flow, profit margin)
+- **Trends / Time Series View** — Interactive multi-line chart showing KPI trends over time with time range and KPI selection
+- **KPI Detail View** — Click any KPI card to open a detail page with an expanded chart, monthly breakdown table, and summary header
+- **Forecast** — Simple Moving Average forecast with trend extrapolation and confidence band on each KPI detail chart, togglable via switch
+- **Booking Anomaly Detection** — Anomaly list view surfacing typos, similar-name hits, and unusual bookings with inline diff highlighting
+- **Export** — Generate and download reports in Markdown or JSON format with configurable KPI selection
 
 ## Tech Stack
 
-- **Framework:** [Next.js](https://nextjs.org) (App Router)
-- **UI Components:** [shadcn/ui](https://ui.shadcn.com)
+- **Framework:** [Next.js 16](https://nextjs.org) (App Router, Turbopack)
+- **UI:** [React 19](https://react.dev) + [shadcn/ui](https://ui.shadcn.com)
+- **Charts:** [Recharts](https://recharts.org)
 - **Styling:** [Tailwind CSS v4](https://tailwindcss.com)
-- **Language:** TypeScript
+- **Testing:** [Vitest](https://vitest.dev) + React Testing Library
+- **Language:** TypeScript (strict mode)
 
 ## Getting Started
 
@@ -41,14 +46,20 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 ## Project Structure
 
 ```
-northscope/
-├── src/
-│   ├── app/          # Next.js App Router pages and layouts
-│   ├── components/   # Reusable UI components
-│   └── lib/          # Utilities and helpers
-├── public/           # Static assets
-└── package.json
+src/
+├── app/              # Next.js routes — pages and layouts
+├── components/       # React components, grouped by feature
+│   ├── ui/           # shadcn/ui primitives
+│   ├── dashboard/    # Dashboard page components
+│   ├── kpi-detail/   # KPI detail page components
+│   └── bookings/     # Booking anomalies components
+├── lib/              # Pure utility functions
+├── data/             # Mock data and data-generation functions
+├── hooks/            # Custom React hooks
+└── types/            # TypeScript type definitions
 ```
+
+See [ADR-0004](docs/adr/0004-react-module-structure.md) for module structure conventions.
 
 ## License
 
