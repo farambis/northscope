@@ -78,44 +78,19 @@ How we would move from "show the number" to "explain the number" — enabling th
 
 ## Task 4: AI Browser Agents for Testing
 
-> **Disclaimer:** This section was created with the help of Gemini and Claude Code under time constraints. It represents an initial sketch and would need deeper analysis and validation before being used as an actual architecture blueprint.
+An AI browser agent (built on Playwright) describes tests in natural language and uses a vision model to verify what's on screen — you tell it *what to check*, it figures out *how*.
 
-An AI browser agent (built on Playwright) can describe tests in natural language and use a vision model to verify what's on screen — instead of writing brittle CSS selectors, you tell the agent *what to check* and it figures out *how*.
+**Why AI agents over plain Playwright:** Self-healing selectors (finds "the export button" by intent, not brittle `data-testid`), visual assertions (a vision model can tell if a chart rendered correctly — DOM selectors can't), and lower maintenance (natural-language steps don't break when components change).
 
-### Why AI Agents Over Plain Playwright for Smoke Tests
+**Flakiness reduction:** E2E tests are a required CI gate — no merge to `main` and no deployment until green. This forces flaky tests to be fixed immediately since they block the entire team. Static mock data eliminates network races; screenshots and traces on failure enable fast debugging.
 
-- **Self-healing selectors:** When UI changes break a `data-testid` or a class name, a traditional test fails and a developer must update it. An AI agent locates elements by intent ("the export button", "the first KPI card") and adapts to layout changes automatically.
-- **Visual assertions:** "Does this chart look correct?" is nearly impossible to assert with DOM selectors. A vision model can screenshot the page and answer whether the chart rendered with data, has axes, and shows trend lines — catching rendering bugs that selector-based tests miss entirely.
-- **Lower maintenance:** Smoke tests written as natural-language steps (`go to dashboard → verify 5 KPI cards are visible → click export → confirm download`) require no updates when component internals change. The AI agent interprets the intent each run.
-
-### Example Smoke Tests (Pseudocode)
+**Example smoke tests:**
 
 ```
-Test 1: "Dashboard loads correctly"
-  → Navigate to /
-  → Verify the heading "Financial Overview" is visible
-  → Verify exactly 5 KPI cards are displayed, each showing a value and a percentage change
-  → Verify the trends chart is visible with data lines
-
-Test 2: "Export flow works"
-  → Click the "Export Report" button
-  → Verify a dialog opens with format options and KPI checkboxes
-  → Select "Markdown" format
-  → Click "Generate Report"
-  → Verify a file download is triggered with a .md extension
-
-Test 3: "KPI detail navigation"
-  → Click the first KPI card
-  → Verify the page navigates to a detail view showing the KPI name as heading
-  → Verify a chart and a data table are visible on the page
+1. "Dashboard loads" → navigate to / → verify 5 KPI cards with values and change indicators → verify trends chart has data lines
+2. "Export works" → click Export Report → select Markdown → click Generate → verify .md file downloads
+3. "KPI detail" → click first KPI card → verify detail heading, chart, and data table are visible
 ```
-
-### Flakiness Reduction
-
-- **Pipeline gate:** E2E tests run as a required CI check — no merge to `main` and no deployment until they pass. This forces flaky tests to be fixed immediately since they block everyone.
-- **Deterministic data:** Static mock KPIs eliminate network race conditions.
-- **`webServer` config:** Playwright starts and waits for the dev server — no timing issues.
-- **Failure artifacts:** Screenshots and traces on failure, uploaded as CI artifacts for fast debugging.
 
 ## Task 5: AI-Assisted Development Pipeline
 
