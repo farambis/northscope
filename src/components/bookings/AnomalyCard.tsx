@@ -145,14 +145,13 @@ export function AnomalyCard({ group, onDismiss, onAction, onMarkIntended }: Anom
           <ConfidenceBadge confidence={group.confidence} />
         </div>
         <Button
-          variant="outline"
-          size="sm"
-          className="h-7 gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-muted-foreground/50 hover:text-foreground transition-colors"
           onClick={() => onDismiss(group.id)}
           aria-label="Dismiss"
         >
-          <X className="h-3 w-3" />
-          Dismiss
+          <X className="h-3.5 w-3.5" />
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
