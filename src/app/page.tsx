@@ -1,4 +1,5 @@
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
+import { ExportDialog } from "@/components/dashboard/ExportDialog"
 import { KpiCard } from "@/components/dashboard/KpiCard"
 import { KpiGrid } from "@/components/dashboard/KpiGrid"
 import { TrendsSection } from "@/components/dashboard/TrendsSection"
@@ -18,9 +19,12 @@ export default function Home() {
               Real-time insights into your financial performance
             </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Last updated: 2 min ago
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              Last updated: 2 min ago
+            </p>
+            <ExportDialog />
+          </div>
         </div>
         <KpiGrid>
           {kpis.map((kpi) => (
