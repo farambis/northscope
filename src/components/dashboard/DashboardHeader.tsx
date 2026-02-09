@@ -5,16 +5,18 @@ import { usePathname } from "next/navigation"
 import { BarChart3 } from "lucide-react"
 
 const navItems = [
-  { label: "Dashboard", href: "/" },
-  { label: "Reports", href: "/reports" },
-  { label: "Settings", href: "/settings" },
+  { label: "Dashboard", href: "/", indicator: false },
+  { label: "Bookings", href: "/bookings/anomalies", indicator: true },
+  { label: "Reports", href: "/reports", indicator: false },
+  { label: "Settings", href: "/settings", indicator: false },
 ]
 
 function isNavItemActive(href: string, pathname: string): boolean {
   if (href === "/") {
     return pathname === "/" || pathname.startsWith("/kpi/")
   }
-  return pathname === href || pathname.startsWith(href + "/")
+  const baseSegment = href.split("/").filter(Boolean)[0]
+  return pathname.startsWith("/" + baseSegment)
 }
 
 export function DashboardHeader() {
@@ -34,13 +36,16 @@ export function DashboardHeader() {
             <Link
               key={item.label}
               href={item.href}
-              className={
+              className={`relative ${
                 isNavItemActive(item.href, pathname)
                   ? "text-sm font-medium text-foreground"
                   : "text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              }
+              }`}
             >
               {item.label}
+              {item.indicator && (
+                <span className="absolute -right-2 -top-1 h-2 w-2 rounded-full bg-negative" />
+              )}
             </Link>
           ))}
         </nav>
