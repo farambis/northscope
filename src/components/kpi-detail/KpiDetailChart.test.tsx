@@ -35,4 +35,17 @@ describe("KpiDetailChart", () => {
 
     expect(screen.getByText("Trend")).toBeInTheDocument()
   })
+
+  it("renders the forecast checkbox checked by default", () => {
+    render(<KpiDetailChart kpiId="mrr" color="var(--chart-1)" />)
+
+    const checkbox = screen.getByRole("checkbox")
+    expect(checkbox).toBeChecked()
+  })
+
+  it("renders the Show Forecast label", () => {
+    render(<KpiDetailChart kpiId="mrr" color="var(--chart-1)" />)
+
+    expect(screen.getByText("Show Forecast")).toBeInTheDocument()
+  })
 })
