@@ -76,6 +76,47 @@ How we would move from "show the number" to "explain the number" — enabling th
 
 - **Risk 2 — Hallucination / incorrect attribution:** The LLM may fabricate connections between real documents or misattribute a policy to the wrong KPI. *Mitigation:* Constrained generation — the model may only cite chunk IDs that were actually retrieved (enforced by post-processing validation). Graph-based answers are preferred over pure vector answers for lineage questions, since relations are explicit rather than inferred. Confidence scoring on retrieval results lets the UI distinguish high-confidence answers from best-effort ones.
 
+## Task 4: AI Browser Agents for Testing
+
+> **Disclaimer:** This section was created with the help of Gemini and Claude Code under time constraints. It represents an initial sketch and would need deeper analysis and validation before being used as an actual architecture blueprint.
+
+An AI browser agent (built on Playwright) can describe tests in natural language and use a vision model to verify what's on screen — instead of writing brittle CSS selectors, you tell the agent *what to check* and it figures out *how*.
+
+### Why AI Agents Over Plain Playwright for Smoke Tests
+
+- **Self-healing selectors:** When UI changes break a `data-testid` or a class name, a traditional test fails and a developer must update it. An AI agent locates elements by intent ("the export button", "the first KPI card") and adapts to layout changes automatically.
+- **Visual assertions:** "Does this chart look correct?" is nearly impossible to assert with DOM selectors. A vision model can screenshot the page and answer whether the chart rendered with data, has axes, and shows trend lines — catching rendering bugs that selector-based tests miss entirely.
+- **Lower maintenance:** Smoke tests written as natural-language steps (`go to dashboard → verify 5 KPI cards are visible → click export → confirm download`) require no updates when component internals change. The AI agent interprets the intent each run.
+
+### Example Smoke Tests (Pseudocode)
+
+```
+Test 1: "Dashboard loads correctly"
+  → Navigate to /
+  → Verify the heading "Financial Overview" is visible
+  → Verify exactly 5 KPI cards are displayed, each showing a value and a percentage change
+  → Verify the trends chart is visible with data lines
+
+Test 2: "Export flow works"
+  → Click the "Export Report" button
+  → Verify a dialog opens with format options and KPI checkboxes
+  → Select "Markdown" format
+  → Click "Generate Report"
+  → Verify a file download is triggered with a .md extension
+
+Test 3: "KPI detail navigation"
+  → Click the first KPI card
+  → Verify the page navigates to a detail view showing the KPI name as heading
+  → Verify a chart and a data table are visible on the page
+```
+
+### Flakiness Reduction
+
+- **Pipeline gate:** E2E tests run as a required CI check — no merge to `main` and no deployment until they pass. This forces flaky tests to be fixed immediately since they block everyone.
+- **Deterministic data:** Static mock KPIs eliminate network race conditions.
+- **`webServer` config:** Playwright starts and waits for the dev server — no timing issues.
+- **Failure artifacts:** Screenshots and traces on failure, uploaded as CI artifacts for fast debugging.
+
 ## Task 5: AI-Assisted Development Pipeline
 
 This section describes the AI-assisted development pipeline used to build Fara-Scope. Every feature flows through a structured sequence of roles, automated gates, and review checkpoints before it reaches `main`.
