@@ -3,10 +3,15 @@
 import { useMemo, useState } from "react"
 import { CheckCircle2, Search } from "lucide-react"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { AnomalyGroup, AnomalyType } from "@/types/anomaly"
+import { defaultTags, tagColors } from "@/data/default-tags"
+import type { AnomalyGroup, AnomalyType, Tag } from "@/types/anomaly"
 import { AnomalyCard } from "./AnomalyCard"
 import { AnomalySummaryBar } from "./AnomalySummaryBar"
+import { AnomalyTable } from "./AnomalyTable"
+import { BulkActionBar } from "./BulkActionBar"
+import { ViewToggle, type ViewMode } from "./ViewToggle"
 
 interface AnomalyListProps {
   anomalies: AnomalyGroup[]
@@ -47,12 +52,33 @@ function matchesSearch(group: AnomalyGroup, query: string): boolean {
   )
 }
 
+function computeCommonTags(
+  selectedIds: Set<string>,
+  anomalyTags: Record<string, string[]>,
+): string[] {
+  const ids = [...selectedIds]
+  if (ids.length === 0) return []
+  const first = new Set(anomalyTags[ids[0]] ?? [])
+  for (let i = 1; i < ids.length; i++) {
+    const tags = new Set(anomalyTags[ids[i]] ?? [])
+    for (const tag of first) {
+      if (!tags.has(tag)) first.delete(tag)
+    }
+  }
+  return [...first]
+}
+
 export function AnomalyList({ anomalies }: AnomalyListProps) {
   const [activeTab, setActiveTab] = useState<TabValue>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState<SortOption>("confidence")
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
   const [markedIntendedIds, setMarkedIntendedIds] = useState<Set<string>>(new Set())
+  const [viewMode, setViewMode] = useState<ViewMode>("cards")
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [tags, setTags] = useState<Tag[]>(defaultTags)
+  const [anomalyTags, setAnomalyTags] = useState<Record<string, string[]>>({})
+  const [activeTagFilters, setActiveTagFilters] = useState<Set<string>>(new Set())
 
   const activeAnomalies = useMemo(() => {
     return anomalies.filter((a) => !dismissedIds.has(a.id) && !markedIntendedIds.has(a.id))
@@ -69,6 +95,13 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
       result = result.filter((a) => matchesSearch(a, searchQuery))
     }
 
+    if (activeTagFilters.size > 0) {
+      result = result.filter((a) => {
+        const groupTags = anomalyTags[a.id] ?? []
+        return [...activeTagFilters].every((tagId) => groupTags.includes(tagId))
+      })
+    }
+
     result = [...result].sort((a, b) => {
       switch (sortBy) {
         case "confidence":
@@ -81,7 +114,21 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
     })
 
     return result
-  }, [activeAnomalies, activeTab, searchQuery, sortBy])
+  }, [activeAnomalies, activeTab, searchQuery, sortBy, activeTagFilters, anomalyTags])
+
+  // Derive visible selection — prunes selected IDs not in current filtered view
+  const visibleSelectedIds = useMemo(() => {
+    const visibleIds = new Set(filteredAnomalies.map((a) => a.id))
+    return new Set([...selectedIds].filter((id) => visibleIds.has(id)))
+  }, [filteredAnomalies, selectedIds])
+
+  // Clear selection when switching to cards view
+  function handleViewModeChange(mode: ViewMode) {
+    setViewMode(mode)
+    if (mode === "cards") {
+      setSelectedIds(new Set())
+    }
+  }
 
   function handleDismiss(id: string) {
     setDismissedIds((prev) => new Set([...prev, id]))
@@ -131,6 +178,93 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
     })
   }
 
+  function handleSelectChange(id: string, checked: boolean) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (checked) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  }
+
+  function handleSelectAll(checked: boolean) {
+    if (checked) {
+      setSelectedIds(new Set(filteredAnomalies.map((a) => a.id)))
+    } else {
+      setSelectedIds(new Set())
+    }
+  }
+
+  function handleBulkDismiss() {
+    const ids = [...visibleSelectedIds]
+    setDismissedIds((prev) => new Set([...prev, ...ids]))
+    setSelectedIds(new Set())
+    toast(`${ids.length} anomalies dismissed`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setDismissedIds((prev) => {
+            const next = new Set(prev)
+            ids.forEach((id) => next.delete(id))
+            return next
+          })
+        },
+      },
+    })
+  }
+
+  function handleBulkMarkIntended() {
+    const ids = [...visibleSelectedIds]
+    setMarkedIntendedIds((prev) => new Set([...prev, ...ids]))
+    setSelectedIds(new Set())
+    toast(`${ids.length} anomalies marked as intended`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setMarkedIntendedIds((prev) => {
+            const next = new Set(prev)
+            ids.forEach((id) => next.delete(id))
+            return next
+          })
+        },
+      },
+    })
+  }
+
+  function handleBulkToggleTag(tagId: string) {
+    const ids = [...visibleSelectedIds]
+    setAnomalyTags((prev) => {
+      const next = { ...prev }
+      for (const id of ids) {
+        const current = next[id] ?? []
+        if (current.includes(tagId)) {
+          next[id] = current.filter((t) => t !== tagId)
+        } else {
+          next[id] = [...current, tagId]
+        }
+      }
+      return next
+    })
+  }
+
+  function handleCreateTag(label: string) {
+    const newTag: Tag = {
+      id: crypto.randomUUID(),
+      label,
+      color: tagColors[tags.length % tagColors.length],
+    }
+    setTags((prev) => [...prev, newTag])
+  }
+
+  function toggleTagFilter(tagId: string) {
+    setActiveTagFilters((prev) => {
+      const next = new Set(prev)
+      if (next.has(tagId)) next.delete(tagId)
+      else next.add(tagId)
+      return next
+    })
+  }
+
   if (activeAnomalies.length === 0) {
     const dismissedCount = dismissedIds.size
     const markedIntendedCount = markedIntendedIds.size
@@ -154,6 +288,16 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
       </div>
     )
   }
+
+  // Count how many anomalies have each tag for the filter chips
+  const tagCounts = tags.reduce<Record<string, number>>((acc, tag) => {
+    acc[tag.id] = activeAnomalies.filter((a) =>
+      (anomalyTags[a.id] ?? []).includes(tag.id),
+    ).length
+    return acc
+  }, {})
+
+  const hasAnyTags = Object.values(tagCounts).some((count) => count > 0)
 
   return (
     <div className="space-y-6">
@@ -192,14 +336,36 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
               </option>
             ))}
           </select>
+          <ViewToggle value={viewMode} onChange={handleViewModeChange} />
         </div>
       </div>
+
+      {hasAnyTags && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">Tags:</span>
+          {tags.map((tag) => {
+            const count = tagCounts[tag.id] ?? 0
+            if (count === 0) return null
+            const isActive = activeTagFilters.has(tag.id)
+            return (
+              <Badge
+                key={tag.id}
+                variant={isActive ? "default" : "outline"}
+                className="cursor-pointer text-xs"
+                onClick={() => toggleTagFilter(tag.id)}
+              >
+                {tag.label} &times;{count}
+              </Badge>
+            )
+          })}
+        </div>
+      )}
 
       {filteredAnomalies.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-muted-foreground">No anomalies match your current filters.</p>
         </div>
-      ) : (
+      ) : viewMode === "cards" ? (
         <div className="space-y-4">
           {filteredAnomalies.map((group) => (
             <AnomalyCard
@@ -211,6 +377,31 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
             />
           ))}
         </div>
+      ) : (
+        <AnomalyTable
+          anomalies={filteredAnomalies}
+          selectedIds={visibleSelectedIds}
+          onSelectChange={handleSelectChange}
+          onSelectAll={handleSelectAll}
+          onDismiss={handleDismiss}
+          onAction={handleAction}
+          onMarkIntended={handleMarkIntended}
+          allTags={tags}
+          anomalyTags={anomalyTags}
+        />
+      )}
+
+      {viewMode === "table" && visibleSelectedIds.size > 0 && (
+        <BulkActionBar
+          selectedCount={visibleSelectedIds.size}
+          availableTags={tags}
+          selectedTagIds={computeCommonTags(visibleSelectedIds, anomalyTags)}
+          onDismiss={handleBulkDismiss}
+          onMarkIntended={handleBulkMarkIntended}
+          onToggleTag={handleBulkToggleTag}
+          onCreateTag={handleCreateTag}
+          onClear={() => setSelectedIds(new Set())}
+        />
       )}
     </div>
   )

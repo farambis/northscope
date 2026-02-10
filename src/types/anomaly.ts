@@ -1,5 +1,11 @@
 export type AnomalyType = "similar" | "typo" | "unusual"
 
+export interface Tag {
+  id: string
+  label: string
+  color: string
+}
+
 export interface BookingEntry {
   id: string
   text: string

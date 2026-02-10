@@ -178,3 +178,115 @@ describe("AnomalyList", () => {
     expect(screen.getByText(/2 marked as intended/i)).toBeInTheDocument()
   })
 })
+
+describe("AnomalyList - table view", () => {
+  it("renders view toggle", () => {
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    expect(screen.getByRole("radio", { name: /cards view/i })).toBeInTheDocument()
+    expect(screen.getByRole("radio", { name: /table view/i })).toBeInTheDocument()
+  })
+
+  it("switches to table view when table toggle is clicked", async () => {
+    const user = userEvent.setup()
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+
+    expect(screen.getByRole("columnheader", { name: "Type" })).toBeInTheDocument()
+    expect(screen.getByRole("columnheader", { name: "Text" })).toBeInTheDocument()
+    expect(screen.getByRole("columnheader", { name: "Amount" })).toBeInTheDocument()
+  })
+
+  it("renders table rows for each anomaly in table view", async () => {
+    const user = userEvent.setup()
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+
+    expect(screen.getByText("SIMILAR")).toBeInTheDocument()
+    expect(screen.getByText("TYPO")).toBeInTheDocument()
+    expect(screen.getByText("UNUSUAL")).toBeInTheDocument()
+  })
+
+  it("shows bulk action bar when items are selected in table view", async () => {
+    const user = userEvent.setup()
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+
+    // Select the first row checkbox
+    const checkboxes = screen.getAllByRole("checkbox")
+    // First checkbox is "select all", rest are row checkboxes
+    await user.click(checkboxes[1])
+
+    expect(screen.getByText("1 selected")).toBeInTheDocument()
+  })
+
+  it("select all selects all visible rows", async () => {
+    const user = userEvent.setup()
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+
+    await user.click(screen.getByRole("checkbox", { name: /select all/i }))
+
+    expect(screen.getByText("3 selected")).toBeInTheDocument()
+  })
+
+  it("bulk dismiss removes all selected items and shows toast", async () => {
+    const user = userEvent.setup()
+    const { toast } = await import("sonner")
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+    await user.click(screen.getByRole("checkbox", { name: /select all/i }))
+    await user.click(screen.getByRole("button", { name: /^dismiss$/i }))
+
+    expect(screen.getByText(/all reviewed/i)).toBeInTheDocument()
+    expect(toast).toHaveBeenCalledWith("3 anomalies dismissed", expect.objectContaining({
+      action: expect.any(Object),
+    }))
+  })
+
+  it("bulk mark as intended removes all selected and shows toast", async () => {
+    const user = userEvent.setup()
+    const { toast } = await import("sonner")
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+    await user.click(screen.getByRole("checkbox", { name: /select all/i }))
+    await user.click(screen.getByRole("button", { name: /^mark as intended$/i }))
+
+    expect(screen.getByText(/all reviewed/i)).toBeInTheDocument()
+    expect(toast).toHaveBeenCalledWith("3 anomalies marked as intended", expect.objectContaining({
+      action: expect.any(Object),
+    }))
+  })
+
+  it("switching back to cards clears selection", async () => {
+    const user = userEvent.setup()
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+    await user.click(screen.getByRole("checkbox", { name: /select all/i }))
+    expect(screen.getByText("3 selected")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("radio", { name: /cards view/i }))
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+
+    expect(screen.queryByText(/selected/)).not.toBeInTheDocument()
+  })
+
+  it("filters work in table view", async () => {
+    const user = userEvent.setup()
+    render(<AnomalyList anomalies={mockAnomalies} />)
+
+    await user.click(screen.getByRole("radio", { name: /table view/i }))
+    await user.click(screen.getByRole("tab", { name: /similar/i }))
+
+    expect(screen.getByText("SIMILAR")).toBeInTheDocument()
+    expect(screen.queryByText("TYPO")).not.toBeInTheDocument()
+    expect(screen.queryByText("UNUSUAL")).not.toBeInTheDocument()
+  })
+})
