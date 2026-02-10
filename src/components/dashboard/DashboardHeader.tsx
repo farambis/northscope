@@ -7,6 +7,7 @@ import { BarChart3 } from "lucide-react"
 const navItems = [
   { label: "Dashboard", href: "/", indicator: false },
   { label: "Bookings", href: "/bookings/anomalies", indicator: true },
+  { label: "Accounting", href: "/accounting/rules", indicator: true },
   { label: "Reports", href: "/reports", indicator: false },
   { label: "Settings", href: "/settings", indicator: false },
 ]
