@@ -234,12 +234,13 @@ export function AnomalyList({ anomalies }: AnomalyListProps) {
   function handleBulkToggleTag(tagId: string) {
     const ids = [...visibleSelectedIds]
     setAnomalyTags((prev) => {
+      const allHaveTag = ids.every((id) => (prev[id] ?? []).includes(tagId))
       const next = { ...prev }
       for (const id of ids) {
         const current = next[id] ?? []
-        if (current.includes(tagId)) {
+        if (allHaveTag) {
           next[id] = current.filter((t) => t !== tagId)
-        } else {
+        } else if (!current.includes(tagId)) {
           next[id] = [...current, tagId]
         }
       }
