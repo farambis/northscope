@@ -114,7 +114,7 @@ export function RuleList({ rules }: RuleListProps) {
   const allResolved = activeRules.length === 0 ||
     activeRules.every((r) => acceptedIds.has(r.id))
 
-  if (rules.length > 0 && dismissedIds.size === rules.length) {
+  if (activeRules.length === 0 && rules.length > 0) {
     return (
       <div className="space-y-6">
         <RuleSummaryBar rules={[]} />
@@ -165,6 +165,7 @@ export function RuleList({ rules }: RuleListProps) {
             <input
               type="text"
               placeholder="Search rules..."
+              aria-label="Search rules"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-9 rounded-md border bg-background pl-9 pr-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -173,6 +174,7 @@ export function RuleList({ rules }: RuleListProps) {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
+            aria-label="Sort rules by"
             className="h-9 rounded-md border bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {sortOptions.map((opt) => (
